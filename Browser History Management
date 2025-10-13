@@ -1,0 +1,353 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+
+/**
+ * BrowserHistoryManager_Creative
+ * Demonstrates browser history management using Stack (Back) and Deque (Forward).
+ * Features an enhanced, custom GUI visualization.
+ * * NOTE: This class name MUST match the filename: BrowserHistoryManager_Creative.java
+ */
+public class BrowserHistoryManager_Creative extends JFrame {
+
+    // --- History Data Structures ---
+    private Stack<String> backHistory = new Stack<>();
+    private Deque<String> forwardHistory = new ArrayDeque<>();
+    private String currentPage = "homepage.com"; 
+
+    // --- Swing Components ---
+    private JTextField urlField;
+    private JTextField visitField;
+    private JButton backButton;
+    private JButton forwardButton;
+    private JButton visitButton;
+    
+    // --- New/Modified Components for Creative Display ---
+    private JPanel historyLogPanel; 
+    private JScrollPane historyScrollPane; 
+
+    // --- Color Palette and Styling (Darkened & Professional) ---
+    private final Color PRIMARY_NAVY = new Color(20, 50, 80);        // Deep Navy
+    private final Color ACTION_ORANGE = new Color(210, 100, 0);     // Muted Orange for VISIT
+    private final Color LIGHT_BG = new Color(240, 240, 245);        // Off-White Background
+    private final Color ACCENT_GREEN_DARK = new Color(0, 100, 50);  // Darker Green for FORWARD
+    private final Color ACCENT_RED_DARK = new Color(170, 40, 30);   // Darker Red for BACK
+    private final Color ACTIVE_HIGHLIGHT = new Color(255, 255, 180); // Softer Yellow highlight
+
+    public BrowserHistoryManager_Creative() {
+        super("Browser History Manager: The Stack-Deque Trail Guide");
+
+        // --- Setup Main Frame ---
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(15, 15));
+        getContentPane().setBackground(LIGHT_BG);
+        ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
+
+        // --- 1. Top Panel (URL Input) ---
+        JPanel topPanel = createTopPanel();
+        
+        // --- 2. Center Panel (Current Page & Navigation) ---
+        JPanel centerContainer = createCenterPanel();
+
+        // --- 3. History Display Panel (South) ---
+        historyLogPanel = new JPanel(new GridLayout(1, 2, 20, 0)); 
+        historyLogPanel.setBackground(LIGHT_BG);
+        historyLogPanel.setBorder(new EmptyBorder(10, 0, 0, 0)); 
+
+        historyScrollPane = new JScrollPane(historyLogPanel);
+        historyScrollPane.setBorder(null);
+        
+        // KEY CHANGE: Set a preferred size for the scroll pane to make it bigger
+        historyScrollPane.setPreferredSize(new Dimension(750, 250)); 
+        
+        // Setting the titled border on the scroll pane wrapper
+        historyScrollPane.setBorder(new TitledBorder(
+             BorderFactory.createLineBorder(PRIMARY_NAVY, 1),
+             "HISTORY TRAIL MAP (Stack/Deque Visualization)",
+             TitledBorder.CENTER, TitledBorder.TOP,
+             new Font("Segoe UI", Font.BOLD, 14), PRIMARY_NAVY
+        ));
+        
+        // --- Add Panels to Frame ---
+        add(topPanel, BorderLayout.NORTH);
+        add(centerContainer, BorderLayout.CENTER);
+        add(historyScrollPane, BorderLayout.SOUTH); 
+
+        // --- Listeners and Initial Display ---
+        setupListeners(); 
+        updateGUI();
+
+        pack();
+        setMinimumSize(new Dimension(800, 680)); 
+        setLocationRelativeTo(null); 
+    }
+    
+    // ----------------------------------------------------------------------
+    // --- Panel Creation Methods ---
+    // ----------------------------------------------------------------------
+
+    private JPanel createTopPanel() {
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
+        topPanel.setBackground(LIGHT_BG);
+        
+        JLabel urlLabel = new JLabel("New URL:");
+        urlLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        
+        visitField = new JTextField(35);
+        visitField.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        
+        visitButton = new JButton("VISIT");
+        
+        visitButton.setBackground(ACTION_ORANGE);
+        visitButton.setForeground(Color.WHITE);
+        visitButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        visitButton.setFocusPainted(false);
+        visitButton.setPreferredSize(new Dimension(100, 30));
+
+        visitField.setText("Enter URL: e.g., google.com");
+        visitField.setForeground(Color.GRAY);
+        setupVisitFieldFocusListener();
+
+        topPanel.add(urlLabel);
+        topPanel.add(visitField);
+        topPanel.add(visitButton);
+        return topPanel;
+    }
+
+    private JPanel createCenterPanel() {
+        JPanel centerContainer = new JPanel(new GridLayout(2, 1, 0, 20));
+        centerContainer.setBackground(LIGHT_BG);
+        
+        // Current Page Display
+        JPanel currentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        currentPanel.setBackground(LIGHT_BG);
+        JLabel currentLabel = new JLabel("CURRENT LOCATION:");
+        currentLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        
+        urlField = new JTextField(currentPage, 35);
+        urlField.setEditable(false);
+        urlField.setHorizontalAlignment(JTextField.CENTER);
+        urlField.setFont(new Font("Consolas", Font.BOLD, 18));
+        urlField.setBackground(ACTIVE_HIGHLIGHT); 
+        urlField.setForeground(PRIMARY_NAVY);
+        urlField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PRIMARY_NAVY, 3),
+            new EmptyBorder(5, 5, 5, 5)
+        ));
+        
+        currentPanel.add(currentLabel);
+        currentPanel.add(urlField);
+        centerContainer.add(currentPanel);
+
+        // Navigation Buttons
+        JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 10));
+        navigationPanel.setBackground(LIGHT_BG);
+        
+        backButton = new JButton("<html>&#x25C0; &nbsp;BACK (LIFO)</html>"); 
+        forwardButton = new JButton("<html>FORWARD&nbsp; &#x25B6;</html>");
+        
+        styleNavButton(backButton, ACCENT_RED_DARK);
+        styleNavButton(forwardButton, ACCENT_GREEN_DARK);
+
+        navigationPanel.add(backButton);
+        navigationPanel.add(forwardButton);
+        centerContainer.add(navigationPanel);
+        return centerContainer;
+    }
+    
+    // ----------------------------------------------------------------------
+    // --- Core Logic (Unchanged) ---
+    // ----------------------------------------------------------------------
+    
+    private void visit(String newUrl) {
+        if (newUrl == null || newUrl.trim().isEmpty() || newUrl.equals(currentPage)
+                || newUrl.equals("Enter URL: e.g., google.com")) {
+            return;
+        }
+        // Stack Operation: Push current page to the Back Stack
+        backHistory.push(currentPage);
+        // Queue/Deque Operation: Clear Forward Deque on a new visit
+        forwardHistory.clear();
+        currentPage = newUrl;
+        updateGUI();
+    }
+
+    private void goBack() {
+        if (backHistory.isEmpty()) {
+            return; 
+        }
+        // Queue/Deque Operation: Push current page to the Forward Deque
+        forwardHistory.push(currentPage);
+        // Stack Operation: Pop page from the Back Stack to become current
+        currentPage = backHistory.pop(); 
+        updateGUI();
+    }
+
+    private void goForward() {
+        if (forwardHistory.isEmpty()) {
+            return;
+        }
+        // Stack Operation: Push current page to the Back Stack
+        backHistory.push(currentPage);
+        // Queue/Deque Operation: Pop page from the Forward Deque to become current
+        currentPage = forwardHistory.pop(); 
+        updateGUI();
+    }
+    
+    // ----------------------------------------------------------------------
+    // --- GUI Update + Listeners ---
+    // ----------------------------------------------------------------------
+    
+    private void setupListeners() {
+        visitButton.addActionListener(e -> {
+            visit(visitField.getText().trim());
+            visitField.setText("Enter URL: e.g., google.com");
+            visitField.setForeground(Color.GRAY);
+        });
+        backButton.addActionListener(e -> goBack());
+        forwardButton.addActionListener(e -> goForward());
+    }
+
+    private void updateGUI() {
+        urlField.setText(currentPage);
+        backButton.setEnabled(!backHistory.isEmpty());
+        forwardButton.setEnabled(!forwardHistory.isEmpty());
+
+        historyLogPanel.removeAll();
+        
+        // Add the custom visual panels (which return JScrollPanes)
+        historyLogPanel.add(createHistoryPanel("BACK TRAIL (Stack: LIFO)", backHistory.size(), ACCENT_RED_DARK, backHistory, true));
+        historyLogPanel.add(createHistoryPanel("FORWARD PATH (Deque)", forwardHistory.size(), ACCENT_GREEN_DARK, forwardHistory, false));
+        
+        historyLogPanel.revalidate();
+        historyLogPanel.repaint();
+    }
+
+    /**
+     * Creates a visually distinct panel for either the Stack or the Deque.
+     * Returns a JScrollPane to ensure it's scrollable and can be sized.
+     */
+    private JScrollPane createHistoryPanel(String title, int size, Color color, Collection<String> history, boolean isBackStack) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(LIGHT_BG);
+        panel.setBorder(BorderFactory.createLineBorder(color.darker(), 2));
+
+        JLabel titleLabel = new JLabel(title + " (" + size + " items)");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        titleLabel.setForeground(color.darker());
+        titleLabel.setBorder(new EmptyBorder(5, 10, 5, 10));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(5));
+
+        // Use fully qualified names for List/ArrayList to avoid conflict with java.awt.List
+        java.util.List<String> items = new java.util.ArrayList<>(history); 
+        
+        if (isBackStack) {
+            // Reverse to show history chronologically, with the "pop" item at the end of the visual list
+            Collections.reverse(items);
+        }
+        
+        for (int i = 0; i < items.size(); i++) {
+            String url = items.get(i);
+            
+            JPanel itemPanel = new JPanel(new BorderLayout());
+            itemPanel.setBackground(Color.WHITE);
+            itemPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.lightGray));
+
+            JLabel marker = new JLabel();
+            marker.setFont(new Font("Monospaced", Font.BOLD, 12));
+            
+            // Highlight the page that will be popped next (LIFO/FIFO concept)
+            boolean isNextPop = (isBackStack && i == items.size() - 1) || (!isBackStack && i == 0);
+
+            if (isNextPop) {
+                marker.setText(" \u25B6 "); 
+                marker.setForeground(PRIMARY_NAVY); 
+                itemPanel.setBackground(new Color(220, 240, 255)); // Light blue highlight
+            } else {
+                marker.setText(" \u2022 "); 
+                marker.setForeground(Color.GRAY);
+                itemPanel.setBackground(Color.WHITE); 
+            }
+            
+            JLabel urlLabel = new JLabel(url);
+            urlLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
+            urlLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+            itemPanel.add(marker, BorderLayout.WEST);
+            itemPanel.add(urlLabel, BorderLayout.CENTER);
+            itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.add(itemPanel);
+        }
+        
+        if (items.isEmpty()) {
+            JLabel emptyLabel = new JLabel("  (History is empty / Deque is clear)");
+            emptyLabel.setFont(new Font("Monospaced", Font.ITALIC, 12));
+            emptyLabel.setForeground(Color.GRAY);
+            emptyLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            emptyLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.add(emptyLabel);
+        }
+
+        panel.add(Box.createVerticalGlue());
+        
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+        return scrollPane;
+    }
+    
+    // ----------------------------------------------------------------------
+    // --- Helper Methods ---
+    // ----------------------------------------------------------------------
+    
+    private void styleNavButton(JButton button, Color color) {
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color.darker(), 2),
+            new EmptyBorder(5, 20, 5, 20)
+        ));
+        button.setPreferredSize(new Dimension(180, 50));
+    }
+
+    private void setupVisitFieldFocusListener() {
+        visitField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (visitField.getText().equals("Enter URL: e.g., google.com")) {
+                    visitField.setText("");
+                    visitField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (visitField.getText().isEmpty()) {
+                    visitField.setForeground(Color.GRAY);
+                    visitField.setText("Enter URL: e.g., google.com");
+                }
+            }
+        });
+    }
+
+    // ----------------------------------------------------------------------
+    // --- Main Method ---
+    // ----------------------------------------------------------------------
+    public static void main(String[] args) {
+        // FIX: Instantiating the correct class name
+        SwingUtilities.invokeLater(() -> new BrowserHistoryManager_Creative().setVisible(true));
+    }
+}
