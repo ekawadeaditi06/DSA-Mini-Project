@@ -1,116 +1,57 @@
-# Browser History Manager (Creative GUI)
+# Browser History Manager — Stack & Deque Simulation (Java GUI)
 
-A Java Swing-based application that simulates **browser history management** using **Stack (Back)** and **Deque (Forward)** data structures.  
-It features an interactive GUI with enhanced visualization of back and forward navigation trails.
-
----
-
-## Table of Contents
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Technology Stack](#technology-stack)
-- [How to Run](#how-to-run)
-- [Usage](#usage)
-- [Implementation Details](#implementation-details)
-- [Contributing](#contributing)
-- [License](#license)
+A Java Swing application that simulates browser history using **Stack (Back)** and **Deque (Forward)** data structures.  
+Featuring a simple dark-theme GUI to help understand real browser navigation behavior.
 
 ---
 
-## Features
-- Back and Forward navigation using **Stack (LIFO)** and **Deque (FIFO)**.
-- Custom **dark-themed GUI** with clear visualization of history trails.
-- **Interactive URL input** for visiting new pages.
-- Highlights the **next navigable pages** in the history trails.
-- Scrollable panels for long history logs.
-- Dynamic display of **Back Stack** and **Forward Deque**.
+## ✅ Features
+- Back navigation using **Stack — LIFO**
+- Forward navigation using **Deque — FIFO**
+- Clean & interactive GUI
+- Real-time history updates
+- Compact and beginner-friendly code
 
 ---
 
-## Screenshots
-
-*Add your screenshots inside a `screenshots/` folder in your repo.*
-
-![Main Window](screenshots/main_window.png)  
-*Main browser window with current page and navigation buttons.*
-
-![History Panel](screenshots/history_panel.png)  
-*Back and Forward history trail visualizations.*
+## 🛠 Technology Used
+- **Java (JDK 21 Recommended)**
+- **Swing** for GUI
+- **Stack & ArrayDeque** for history logic
 
 ---
 
-## Technology Stack
-- **Language:** Java (JDK 21 recommended)
-- **GUI Framework:** Swing
-- **Data Structures:** Stack, Deque (ArrayDeque)
-- **Build Tool:** Any Java IDE or command line (`javac` & `java`)
+## 🚀 How to Run
 
----
-
-## How to Run
-
-1. **Clone the repository:**
+### Using Command Line:
 ```bash
-git clone https://github.com/<your-username>/BrowserHistoryManager_Creative.git
-Navigate to the project folder:
-
-bash
-Copy code
-cd BrowserHistoryManager_Creative
-Compile the Java file:
-
-bash
-Copy code
+git clone https://github.com/<your-username>/<repo-name>.git
+cd <repo-name>
 javac BrowserHistoryManager_Creative.java
-Run the application:
-
-bash
-Copy code
 java BrowserHistoryManager_Creative
-Make sure your system has JDK installed and javac is accessible in your PATH.
+✅ The application window will launch
 
-Usage
-Enter a URL in the input field (e.g., google.com) and click VISIT.
+📘 Learning Concepts
+Concept	Purpose
+Stack	Implement Back button behavior
+Deque	Implement Forward button behavior
+Swing	GUI creation and event handling
+DSA + UI	Real-world practical application
 
-Navigate BACK using the back button (Stack – LIFO behavior).
-
-Navigate FORWARD using the forward button (Deque – FIFO behavior).
-
-Observe the dynamically updated history trail panels showing the navigation history.
-
-Implementation Details
-Back History: Implemented using java.util.Stack.
-
-Forward History: Implemented using java.util.ArrayDeque.
-
-Current Page: Displayed in a non-editable text field with a highlight.
-
-GUI Styling: Custom colors for back, forward, and visit actions.
-
-History Panels: Scrollable JScrollPane with items highlighted to show the next pop/visit action.
-
-Contributing
-Contributions are welcome!
-
-Fork the repository.
-
-Create a feature branch:
-
-bash
+📂 Project Structure
 Copy code
-git checkout -b feature/YourFeature
-Commit your changes:
+BrowserHistoryManager_Creative.java
+README.md
+🔄 Navigation Rules
+Operation	What Happens
+Visit new page	Current → Back stack, Forward history cleared
+Back	Move current → Forward deque, Pop from Back to new current
+Forward	Move current → Back stack, Pop from Forward to new current
 
-bash
-Copy code
-git commit -m "Add new feature"
-Push to the branch:
+🤝 Contributing
+Feel free to fork and improve this project!
+Pull Requests are welcome ✅
 
-bash
-Copy code
-git push origin feature/YourFeature
-Open a Pull Request.
-
-License
-This project is open-source and available under the MIT License.
-See LICENSE for more details.
+📜 License
+Licensed under MIT License
+You are free to modify and use this project for learning purposes!
